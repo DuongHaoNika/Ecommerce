@@ -1,7 +1,13 @@
 package com.project.shopapp.controller;
 
 import com.project.shopapp.dtos.ProductDTO;
+import com.project.shopapp.dtos.ProductImageDTO;
+import com.project.shopapp.exception.DataNotFoundException;
+import com.project.shopapp.models.Product;
+import com.project.shopapp.models.ProductImage;
+import com.project.shopapp.services.ProductService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +28,10 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("api/v1/products")
+@RequiredArgsConstructor
 public class ProductController {
+    private final ProductService productService;
+
     @GetMapping("")
     public ResponseEntity<String> getProducts(
             @RequestParam("page") int page,
@@ -36,17 +45,33 @@ public class ProductController {
         return ResponseEntity.status(200).body(String.valueOf(id));
     }
 
-    @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "")
     public ResponseEntity<?> createProduct(
-            @Valid @ModelAttribute ProductDTO productDTO,
+            @Valid @RequestBody ProductDTO productDTO,
+//            @ModelAttribute("files") List<MultipartFile> files,
             BindingResult bindingResult
     ){
         try {
             if(bindingResult.hasErrors()){
                 return ResponseEntity.badRequest().body(bindingResult.getFieldError().getDefaultMessage());
             }
-            List<MultipartFile> files = productDTO.getFiles();
-            files = files == null ? new ArrayList<MultipartFile>() : files;
+            Product product = productService.createProduct(productDTO);
+            return ResponseEntity.status(200).body(product);
+        }
+        catch(Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping(value = "upload/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadImages(
+            @PathVariable("id") Long productId,
+            @RequestParam("files") List<MultipartFile> files
+    ) {
+        try {
+            Product newProduct = productService.getProductById(productId);
+            files = (files == null) ? new ArrayList<MultipartFile>() : files;
+            ArrayList<ProductImage> productImages = new ArrayList<ProductImage>();
             for(MultipartFile file : files){
                 if(file != null && file.getSize() > 0) {
                     if(file.getSize() > 10 * 1024 * 1024){
@@ -57,9 +82,16 @@ public class ProductController {
                         return ResponseEntity.badRequest().body("File is not an image!");
                     }
                     String fileName = storeFile(file);
+                    ProductImage productImage = productService.createProductImage(productId,
+                            ProductImageDTO
+                                    .builder()
+                                    .productId(productId)
+                                    .imageUrl(fileName)
+                                    .build());
+                    productImages.add(productImage);
                 }
             }
-            return ResponseEntity.status(200).body(productDTO.toString());
+            return ResponseEntity.status(200).body("OK");
         }
         catch(Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());

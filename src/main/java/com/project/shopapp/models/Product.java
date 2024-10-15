@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @Table(name = "products")
 @Entity
+@Builder
 public class Product extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,6 +31,6 @@ public class Product extends BaseEntity {
     private String description;
 
     @ManyToOne
-    @Column(name = "category_id", nullable = false)
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 }

@@ -10,6 +10,7 @@ import lombok.*;
 @Setter
 @Table(name = "social_accounts")
 @Entity
+@Builder
 public class SocialAccount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

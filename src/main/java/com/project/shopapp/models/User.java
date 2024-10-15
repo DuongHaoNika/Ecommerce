@@ -12,6 +12,7 @@ import java.util.Date;
 @Setter
 @Table(name = "users")
 @Entity
+@Builder
 public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,6 +43,6 @@ public class User extends BaseEntity {
     private int googleAccountId;
 
     @ManyToOne
-    @Column(name = "role_id")
+    @JoinColumn(name = "role_id")
     private Role role;
 }
