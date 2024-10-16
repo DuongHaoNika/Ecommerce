@@ -12,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
+@Builder
 public class ProductDTO {
     @NotBlank(message = "Title is not empty!")
     @Size(min = 3, max = 200, message = "Title must be between 3 and 200 characters!")

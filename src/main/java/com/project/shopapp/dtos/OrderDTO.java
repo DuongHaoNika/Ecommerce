@@ -10,6 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
+@Builder
 public class OrderDTO {
     @JsonProperty("user_id")
     @Min(value = 1, message = "User ID must be > 1")

@@ -1,13 +1,19 @@
 package com.project.shopapp.controller;
 
+import com.github.javafaker.Faker;
 import com.project.shopapp.dtos.ProductDTO;
 import com.project.shopapp.dtos.ProductImageDTO;
 import com.project.shopapp.exception.DataNotFoundException;
 import com.project.shopapp.models.Product;
 import com.project.shopapp.models.ProductImage;
+import com.project.shopapp.responses.ProductListResponse;
+import com.project.shopapp.responses.ProductResponse;
 import com.project.shopapp.services.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,22 +39,35 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping("")
-    public ResponseEntity<String> getProducts(
+    public ResponseEntity<?> getProducts(
             @RequestParam("page") int page,
             @RequestParam("limit") int limit
     ){
-        return ResponseEntity.status(200).body("OK");
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, Sort.by("createdAt").descending());
+        Page<ProductResponse> productPage = productService.getAllProducts(pageRequest);
+        int totalPages = productPage.getTotalPages();
+        List<ProductResponse> products = productPage.getContent();
+        return ResponseEntity.status(200).body(ProductListResponse
+                .builder()
+                .products(products)
+                .totalPages(totalPages)
+                .build());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<String> getProductById(@PathVariable long id){
-        return ResponseEntity.status(200).body(String.valueOf(id));
+    public ResponseEntity<Product> getProductById(@PathVariable long id){
+        try {
+            Product product = productService.getProductById(id);
+            return ResponseEntity.status(200).body(product);
+        }
+        catch (Exception err) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, err.getMessage(), err);
+        }
     }
 
     @PostMapping(value = "")
     public ResponseEntity<?> createProduct(
             @Valid @RequestBody ProductDTO productDTO,
-//            @ModelAttribute("files") List<MultipartFile> files,
             BindingResult bindingResult
     ){
         try {
@@ -117,6 +136,29 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable long id){
+        productService.deleteProduct(id);
         return ResponseEntity.status(200).body("Deleted product with id " + id);
+    }
+
+    @PostMapping("/fakedata")
+    public void fakedata() {
+        Faker faker = new Faker();
+        for(int i = 0; i < 100; i++) {
+            ProductDTO productDTO = ProductDTO
+                    .builder()
+                    .name(faker.commerce().productName())
+                    .description(faker.lorem().sentence())
+                    .price(Float.parseFloat(faker.commerce().price()))
+                    .categoryId((long)faker.number().numberBetween(1,4))
+                    .url("/demo")
+                    .build();
+            System.out.println(productDTO);
+            try {
+                productService.createProduct(productDTO);
+            }
+            catch (Exception e){
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+            }
+        }
     }
 }

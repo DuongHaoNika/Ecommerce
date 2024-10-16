@@ -1,5 +1,6 @@
 package com.project.shopapp.controller;
 
+import com.github.javafaker.Faker;
 import com.project.shopapp.dtos.OrderDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -41,5 +42,17 @@ public class OderController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteOrder(@PathVariable long id){
         return ResponseEntity.ok().body("Deleted order by id: " + id);
+    }
+
+    @PostMapping("/fakedata")
+    public void fakeData() {
+//        Faker faker = new Faker();
+//        for(int i = 0; i < 100; i++) {
+//            OrderDTO orderDTO = OrderDTO
+//                    .builder()
+//                    .
+//                    .build();
+//
+//        }
     }
 }
