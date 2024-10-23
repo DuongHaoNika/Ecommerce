@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
-public class OrderResponse extends BaseResponse {
+public class OrderResponse {
     private Long id;
 
     @JsonProperty("user_id")

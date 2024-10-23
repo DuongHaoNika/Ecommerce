@@ -3,8 +3,8 @@ package com.project.shopapp.models;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Data
 @NoArgsConstructor
@@ -52,7 +52,7 @@ public class Order {
     private String shippingMethod;
 
     @Column(name = "shipping_date")
-    private Date shippingDate;
+    private LocalDate shippingDate;
 
     @Column(name = "shipping_address")
     private String shippingAddress;
@@ -65,5 +65,4 @@ public class Order {
 
     @Column(name = "active")
     private Boolean active;
-
 }
