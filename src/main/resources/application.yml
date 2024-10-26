@@ -3,7 +3,7 @@ server:
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/shopapp
-    username:
+    username: root
     password:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
@@ -19,3 +19,6 @@ spring:
       max-file-size: 50MB
       max-request-size: 50MB
       enabled: true
+jwt:
+  expiration: 2592000
+  secretKey: "Haodeptrailevelmax"
