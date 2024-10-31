@@ -39,6 +39,7 @@ public class UserService implements IUserService{
                 .dateOfBirth(userDTO.getDateOfBirth())
                 .facebookAccountId(userDTO.getFacebookAccountId())
                 .googleAccountId(userDTO.getGoogleAccountId())
+                .is_active(true)
                 .build();
         userRepository.save(user);
         Role role = roleRepository.findById(userDTO.getRoleId())
@@ -68,7 +69,7 @@ public class UserService implements IUserService{
         }
 
         UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(phoneNumber, password);
+                new UsernamePasswordAuthenticationToken(phoneNumber, password, user.get().getAuthorities());
         authenticationManager.authenticate(authenticationToken);
 
         return jwtTokenUtil.generateToken(user.get());

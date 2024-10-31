@@ -21,4 +21,4 @@ spring:
       enabled: true
 jwt:
   expiration: 2592000
-  secretKey: "Haodeptrailevelmax"
+  secretKey: "Kwcf1S712QB09llAqg7gcqLCD2i5UQWz5gyzg3jLcUQ="

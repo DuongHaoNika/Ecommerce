@@ -5,12 +5,16 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.io.Encoder;
+import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.security.SecureRandom;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +31,9 @@ public class JwtTokenUtil {
 
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
+        this.generateSecretKey();
         claims.put("phoneNumber", user.getPhoneNumber());
+
         try {
             String token = Jwts.builder()
                     .setClaims(claims)
@@ -46,6 +52,14 @@ public class JwtTokenUtil {
     private Key getSignInKey() {
         byte[] bytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(bytes);
+    }
+
+    private String generateSecretKey() {
+        SecureRandom random = new SecureRandom();
+        byte[] randomBytes = new byte[32];
+        random.nextBytes(randomBytes);
+        String secretKey = Encoders.BASE64.encode(randomBytes);
+        return secretKey;
     }
 
     private Claims extractAllClaims(String token) {
@@ -67,5 +81,12 @@ public class JwtTokenUtil {
         return new Date().after(exprirationDate);
     }
 
+    public String extractPhoneNumber(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
 
+    public boolean validateToken(String token, UserDetails userDetails) {
+        String phoneNumber = this.extractPhoneNumber(token);
+        return phoneNumber.equals(userDetails.getUsername()) && !isTokenExpired(token);
+    }
 }
